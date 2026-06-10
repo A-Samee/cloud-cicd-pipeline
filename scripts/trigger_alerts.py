@@ -19,10 +19,10 @@ import argparse
 import os
 import sys
 
+from dotenv import load_dotenv
+
 # ── Ensure project root is on sys.path ──
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from dotenv import load_dotenv
 
 load_dotenv()  # load .env so SLACK_WEBHOOK_URL is available
 
@@ -38,6 +38,7 @@ def trigger_datalake():
         title="🔴 Data Lake Unavailable"
     )
 
+
 def trigger_feature_added():
     metrics.feature_added_total.inc()
     send_slack_alert(
@@ -45,6 +46,7 @@ def trigger_feature_added():
         severity="warning",
         title="🟡 Feature Added to Schema"
     )
+
 
 def trigger_feature_removed():
     metrics.feature_removed_total.inc()
@@ -54,6 +56,7 @@ def trigger_feature_removed():
         title="🟡 Feature Removed from Schema"
     )
 
+
 def trigger_drift():
     metrics.distribution_drift_detected.set(1)
     send_slack_alert(
@@ -61,6 +64,7 @@ def trigger_drift():
         severity="warning",
         title="🟡 Distribution Drift Detected"
     )
+
 
 def trigger_latency():
     for _ in range(20):
@@ -70,6 +74,7 @@ def trigger_latency():
         severity="warning",
         title="🟡 High Response Latency"
     )
+
 
 def trigger_accuracy():
     metrics.model_accuracy.set(0.55)

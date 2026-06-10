@@ -10,7 +10,6 @@ Provides two entry points:
 Can be run standalone:  python -m model.retrain_trigger
 """
 
-import json
 import logging
 import sys
 from pathlib import Path

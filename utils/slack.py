@@ -12,6 +12,7 @@ SEVERITY_EMOJI = {
     "success": "✅",
 }
 
+
 def send_slack_alert(message: str, severity: str = "warning", title: str = None):
     """
     Send a formatted Slack alert using Block Kit.
@@ -44,7 +45,7 @@ def send_slack_alert(message: str, severity: str = "warning", title: str = None)
                     },
                     {
                         "type": "mrkdwn",
-                        "text": f"*Status:*\nFIRING"
+                        "text": "*Status:*\nFIRING"
                     }
                 ]
             },

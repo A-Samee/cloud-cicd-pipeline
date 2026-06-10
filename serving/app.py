@@ -17,7 +17,7 @@ import time
 from pathlib import Path
 
 import joblib
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.responses import Response
 from pydantic import BaseModel
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
