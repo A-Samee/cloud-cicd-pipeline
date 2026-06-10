@@ -1,0 +1,52 @@
+version: "3.8"
+
+# ──────────────────────────────────────────────
+# MLOps Observability Stack
+# ──────────────────────────────────────────────
+# Prometheus scrapes the FastAPI /metrics endpoint on EC2.
+# Grafana visualises the data with a pre-provisioned dashboard.
+# Alertmanager routes firing alerts to Slack.
+#
+# Usage:
+#   bash scripts/render_configs.sh   # inject secrets into templates
+#   docker compose up -d
+# ──────────────────────────────────────────────
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports:
+      - "9093:9093"
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    restart: unless-stopped
+
+volumes:
+  grafana_data:

@@ -1,0 +1,26 @@
+# ──────────────────────────────────────────────
+# Prometheus configuration
+# ──────────────────────────────────────────────
+# Scrapes the FastAPI /metrics endpoint running on EC2.
+# Update the target IP below whenever the EC2 instance changes.
+# ──────────────────────────────────────────────
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+rule_files:
+  - /etc/prometheus/alert_rules.yml
+
+scrape_configs:
+  - job_name: "mlops-inference"
+    static_configs:
+      # EC2 target — update if IP changes
+      - targets: ["3.110.56.107:8000"]
+    metrics_path: /metrics
+    scrape_interval: 15s

@@ -1,0 +1,11 @@
+requests
+prometheus-client
+python-dotenv
+pandas
+numpy
+pytest
+scikit-learn
+joblib
+fastapi
+uvicorn[standard]
+python-multipart

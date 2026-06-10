@@ -1,0 +1,76 @@
+# ──────────────────────────────────────────────
+# Prometheus alert rules — 7 MLOps alerts
+# ──────────────────────────────────────────────
+
+groups:
+  - name: mlops_alerts
+    rules:
+      # 1. Data lake returned HTTP 503 recently.
+      - alert: DataLakeUnavailable
+        expr: increase(datalake_unavailable_total[1m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Data lake unavailable"
+          description: "Data source returned 503. Check API availability."
+
+      # 2. A new feature appeared in the ingested schema.
+      - alert: FeatureAdded
+        expr: increase(feature_added_total[1m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "New feature in schema"
+          description: "New feature detected in schema. Retraining may be required."
+
+      # 3. A feature was dropped from the ingested schema.
+      - alert: FeatureRemoved
+        expr: increase(feature_removed_total[1m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Feature removed from schema"
+          description: "Feature dropped from schema. Verify pipeline compatibility."
+
+      # 4. Distribution drift detected (batch-level).
+      - alert: DistributionDrift
+        expr: distribution_drift_detected == 1
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Distribution drift detected"
+          description: "Data distribution drift detected. Model may be stale."
+
+      # 5. Feature-level drift flagged (broader catch).
+      - alert: FeatureDriftDetected
+        expr: distribution_drift_detected > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Feature-level drift flagged"
+          description: "Feature-level drift flagged. Investigate upstream data."
+
+      # 6. P95 response latency exceeded 1 second for 2+ minutes.
+      - alert: HighResponseLatency
+        expr: histogram_quantile(0.95, rate(response_delay_seconds_bucket[5m])) > 1.0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High P95 response latency"
+          description: "P95 response latency exceeded 1 second."
+
+      # 7. Model accuracy fell below the 0.80 threshold.
+      - alert: LowModelAccuracy
+        expr: model_accuracy < 0.8
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low model accuracy"
+          description: "Model accuracy dropped below threshold. Auto-retraining triggered."

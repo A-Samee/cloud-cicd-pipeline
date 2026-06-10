@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "accuracy": 0.909091,
+  "trained_at": "2026-05-09T19:18:20.310419+00:00",
+  "n_features": 2,
+  "feature_names": [
+    "feat_0",
+    "feat_1"
+  ],
+  "rows_used": 110
+}
