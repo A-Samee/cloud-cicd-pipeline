@@ -90,16 +90,20 @@ jobs:
       - name: Verify deployment health
         run: |
           echo "Waiting for service to start..."
-          for i in $(seq 1 10); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_HOST }}:8000/health)
+          sleep 15
+          for i in $(seq 1 15); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              --connect-timeout 10 \
+              --max-time 15 \
+              http://${{ secrets.EC2_HOST }}:8000/health || echo "000")
             if [ "$STATUS" = "200" ]; then
               echo "Health check passed on attempt $i"
               exit 0
             fi
-            echo "Attempt $i: got $STATUS, retrying in 5s..."
-            sleep 5
+            echo "Attempt $i/15: got HTTP $STATUS, retrying in 8s..."
+            sleep 8
           done
-          echo "Health check failed after 10 attempts"
+          echo "Health check failed after 15 attempts"
           exit 1
 
       - name: Notify Slack on success
