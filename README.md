@@ -4,6 +4,47 @@
 
 End-to-end MLOps pipeline with data ingestion, schema monitoring, drift detection, automated model retraining, inference serving, and full observability.
 
+## Team
+
+- **Name:** Abdul Samee
+- **Roll Number:** 22i-1051
+
+
+
+## Video Demo
+
+📹 [Watch the full system demo]
+(https://drive.google.com/file/d/1zZoFWHLLqBOdrvgOuFfufiObvlc6htK0/view?usp=sharing)
+
+## Configuring Slack Webhook
+
+1. Go to https://api.slack.com/apps → Create App → Incoming Webhooks
+2. Activate incoming webhooks → Add to Workspace → select your channel
+3. Copy the webhook URL
+4. Add to `.env` as `SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...`
+5. Run `bash scripts/render_configs.sh` to inject it into alertmanager config
+
+## Live AWS EC2 Endpoints
+
+The inference server is deployed at `http://3.110.56.107:8000`
+
+Test /health:
+```bash
+curl http://3.110.56.107:8000/health
+```
+
+Test /predict:
+```bash
+curl -X POST http://3.110.56.107:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"features": {"feature_0": 1.5, "feature_1": -0.3, "feature_2": 2.1}}'
+```
+
+Test /metrics:
+```bash
+curl http://3.110.56.107:8000/metrics
+```
+
 ## Project Structure
 
 ```
@@ -45,13 +86,17 @@ End-to-end MLOps pipeline with data ingestion, schema monitoring, drift detectio
 ## Quick Start
 
 ```bash
+# 0. Clone the repo
+git clone https://github.com/NUCES-ISB/course-project-Samee212.git
+cd course-project-Samee212
+
 # 1. Create virtual environment and install deps
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
 # 2. Copy and fill in your environment config
 cp .env.example .env
-# Edit .env with your SLACK_WEBHOOK_URL, EC2_HOST, etc.
+# Edit .env — set SLACK_WEBHOOK_URL, EC2_HOST, DOCKER_USERNAME
 
 # 3. Run ingestion (polls the live API every 30s)
 python -m ingestion.ingestion
