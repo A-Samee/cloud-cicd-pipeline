@@ -54,7 +54,7 @@ cp .env.example .env
 # Edit .env with your SLACK_WEBHOOK_URL, EC2_HOST, etc.
 
 # 3. Run ingestion (polls the live API every 30s)
-python ingestion/ingestion.py
+python -m ingestion.ingestion
 
 # 4. Train a model (needs ≥50 rows in data/records.csv)
 python -m model.train
@@ -150,7 +150,7 @@ Go to Settings → Secrets and Variables → Actions → New repository secret:
 |---|---|
 | DOCKER_USERNAME | Your DockerHub username |
 | DOCKER_PASSWORD | DockerHub access token (not your password) |
-| EC2_HOST | 3.110.56.107 |
+| EC2_HOST | `<your-ec2-public-ip>` |
 | EC2_USER | ubuntu |
 | EC2_SSH_KEY | Full contents of mlops-key.pem |
 | SLACK_WEBHOOK_URL | Your Slack webhook URL |
@@ -160,3 +160,38 @@ Go to Settings → Secrets and Variables → Actions → New repository secret:
 1. **Lint and test** — flake8 + pytest (5 tests)
 2. **Build and push** — builds Docker image, pushes `:latest` and `:<git-sha>` to DockerHub
 3. **Deploy to EC2** — SSHs in, pulls latest image, restarts container, verifies `/health`
+
+## Screenshots
+
+All evidence screenshots are in the `screenshots/` directory:
+
+| File | Shows |
+|---|---|
+| ec2_instance_running.png | AWS EC2 instance in Running state |
+| ec2_health.png | GET /health returning 200 with model version and accuracy |
+| ec2_predict.png | POST /predict returning prediction and confidence |
+| ec2_metrics_raw.png | GET /metrics returning Prometheus text format |
+| prometheus_target_up.png | Prometheus target health showing EC2 as UP |
+| grafana_dashboard.png | Grafana dashboard with all 6 panels showing live data |
+| slack_alert_datalake.png | Slack alert: Data Lake Unavailable (CRITICAL) |
+| slack_alert_feature_added.png | Slack alert: Feature Added to Schema (WARNING) |
+| slack_alert_feature_removed.png | Slack alert: Feature Removed from Schema (WARNING) |
+| slack_alert_drift.png | Slack alert: Distribution Drift Detected (WARNING) |
+| slack_alert_latency.png | Slack alert: High Response Latency (WARNING) |
+| slack_alert_accuracy.png | Slack alert: Low Model Accuracy (CRITICAL) |
+| github_actions_green.png | GitHub Actions: all 3 jobs passing (green) |
+
+## Prometheus Metrics (Phase 4)
+
+All 8 metrics exposed at `GET /metrics`:
+
+| Metric | Type | Description |
+|---|---|---|
+| `model_accuracy` | Gauge | Current validation accuracy (0.0–1.0) |
+| `records_processed_total` | Counter | Total records ingested since startup |
+| `retrain_count_total` | Counter | Total model retrains triggered |
+| `distribution_drift_detected` | Gauge | 1 if drift detected, 0 otherwise |
+| `feature_added_total` | Counter | Features added to schema since startup |
+| `feature_removed_total` | Counter | Features removed from schema since startup |
+| `datalake_unavailable_total` | Counter | Times /records returned 503 |
+| `response_delay_seconds` | Histogram | /predict endpoint latency in seconds |

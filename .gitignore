@@ -20,3 +20,5 @@ Thumbs.db
 
 # ── Pytest ──
 .pytest_cache/
+
+flake8_out.txt

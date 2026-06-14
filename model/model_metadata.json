@@ -1,11 +1,11 @@
 {
-  "version": 2,
-  "accuracy": 0.871429,
-  "trained_at": "2026-06-14T17:26:53.846999+00:00",
+  "version": 4,
+  "accuracy": 0.914634,
+  "trained_at": "2026-06-14T17:50:26.083340+00:00",
   "n_features": 2,
   "feature_names": [
     "feat_0",
     "feat_1"
   ],
-  "rows_used": 350
+  "rows_used": 820
 }
