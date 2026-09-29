@@ -60,12 +60,14 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:latest
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            \({{ env.IMAGE_NAME }}:\){{ github.sha }}
 
   deploy-to-ec2:
     name: Deploy to AWS EC2
     runs-on: ubuntu-latest
     needs: build-and-push
+    # Automatically skips on git push, runs only when manually triggered from the Actions tab
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -100,7 +102,7 @@ jobs:
               echo "Health check passed on attempt $i"
               exit 0
             fi
-            echo "Attempt $i/15: got HTTP $STATUS, retrying in 8s..."
+            echo "Attempt \(i/15: got HTTP\)STATUS, retrying in 8s..."
             sleep 8
           done
           echo "Health check failed after 15 attempts"
@@ -108,14 +110,26 @@ jobs:
 
       - name: Notify Slack on success
         if: success()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
-            -H "Content-Type: application/json" \
-            -d "{\"text\": \"CI/CD passed. Deployed mlops-app to EC2 ${{ secrets.EC2_HOST }}. Commit: ${{ github.sha }}\"}"
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -X POST "$SLACK_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "{\"text\": \"CI/CD passed. Deployed mlops-app to EC2 \({{ secrets.EC2_HOST }}. Commit:\){{ github.sha }}\"}"
+          else
+            echo "SLACK_WEBHOOK_URL not set, skipping notification."
+          fi
 
       - name: Notify Slack on failure
         if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
-            -H "Content-Type: application/json" \
-            -d "{\"text\": \"CI/CD FAILED on commit ${{ github.sha }}. Check GitHub Actions logs.\"}"
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -X POST "$SLACK_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "{\"text\": \"CI/CD FAILED on commit ${{ github.sha }}. Check GitHub Actions logs.\"}"
+          else
+            echo "SLACK_WEBHOOK_URL not set, skipping notification."
+          fi
