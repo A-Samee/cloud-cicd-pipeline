@@ -60,7 +60,7 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:latest
-            \({{ env.IMAGE_NAME }}:\){{ github.sha }}
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
   deploy-to-ec2:
     name: Deploy to AWS EC2
@@ -102,7 +102,7 @@ jobs:
               echo "Health check passed on attempt $i"
               exit 0
             fi
-            echo "Attempt \(i/15: got HTTP\)STATUS, retrying in 8s..."
+            echo "Attempt $i/15: got HTTP $STATUS, retrying in 8s..."
             sleep 8
           done
           echo "Health check failed after 15 attempts"
@@ -116,7 +116,7 @@ jobs:
           if [ -n "$SLACK_WEBHOOK_URL" ]; then
             curl -X POST "$SLACK_WEBHOOK_URL" \
               -H "Content-Type: application/json" \
-              -d "{\"text\": \"CI/CD passed. Deployed mlops-app to EC2 \({{ secrets.EC2_HOST }}. Commit:\){{ github.sha }}\"}"
+              -d "{\"text\": \"CI/CD passed. Deployed mlops-app to EC2 ${{ secrets.EC2_HOST }}. Commit: ${{ github.sha }}\"}"
           else
             echo "SLACK_WEBHOOK_URL not set, skipping notification."
           fi
